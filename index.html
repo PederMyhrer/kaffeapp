@@ -87,6 +87,16 @@ details.own summary { cursor: pointer; font-weight: 600; color: var(--roast); }
 .crosslink { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .crosslink p { margin: 0; color: var(--muted); }
 .link-btn { border: 0; background: none; color: var(--roast); font: 600 14px var(--body); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.price-toggle { justify-self: start; }
+.price { display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+.price select { width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: 500 16px var(--body); padding: 0 10px; }
+.price-sum { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.price-sum b { font: 500 clamp(30px, 8vw, 40px) var(--mono); color: var(--crema); font-variant-numeric: tabular-nums; }
+.price-sum span { color: var(--muted); }
+.price-rows { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.price-rows div { display: flex; justify-content: space-between; gap: 12px; }
+.price-rows .num { color: var(--ink); }
+.price .fine { margin: 0; font-size: 13px; color: var(--muted); }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -151,6 +161,19 @@ details.own summary { cursor: pointer; font-weight: 600; color: var(--roast); }
         <span><em style="background:var(--roast);opacity:.55"></em>Blir igjen i gruten <b class="num" id="outAbs"></b></span>
       </div>
     </div>
+    <button type="button" class="btn ghost price-toggle" id="priceBtn" aria-expanded="false" aria-controls="price">Se pris</button>
+    <div class="price" id="price" hidden>
+      <div>
+        <label class="ctl-label" for="bean">Kaffe</label>
+        <select id="bean"></select>
+      </div>
+      <div class="price-sum"><b id="priceTotal"></b><span id="priceEach"></span></div>
+      <div class="price-rows">
+        <div><span id="priceCoffeeLabel">Kaffe</span><span class="num" id="priceCoffee"></span></div>
+        <div><span>Filter (149 kr for 100)</span><span class="num" id="priceFilter"></span></div>
+      </div>
+      <p class="fine">Priser fra stockfleths.as i oktober 2026. Bare for moro skyld, sjekk butikken for dagens pris.</p>
+    </div>
   </section>
 
   <section class="card" aria-label="Helleplan">
@@ -208,7 +231,19 @@ const BUILTIN = [
 ];
 const RATIOS = [[15, 'Sterk'], [16, 'Normal'], [17, 'Din'], [18, 'Mild']];
 const TOTALS = [250, 500, 750, 1000];
-const DEFAULT = { mode: 'antall', unit: 'g', preset: 'termos', n: 1, total: 500, ratio: 17 };
+const BEANS = [
+  { id: 'halo-beriti', name: 'Halo Beriti, Etiopia', fav: true, kr: 265, g: 250 },
+  { id: 'el-matazano', name: 'El Matazano, El Salvador', kr: 205, g: 250 },
+  { id: 'el-tambor', name: 'El Tambor, Honduras', kr: 210, g: 250 },
+  { id: 'gachatha', name: 'Gachatha, Kenya', kr: 215, g: 250 },
+  { id: 'suke-quto', name: 'Suke Quto, Etiopia', kr: 180, g: 250 },
+  { id: 'suke-quto-1kg', name: 'Suke Quto 1 kg, Etiopia', kr: 695, g: 1000 },
+  { id: 'badra', name: 'Badra, India', kr: 180, g: 250 },
+  { id: 'klassisk', name: 'Stockfleths Klassisk', kr: 165, g: 250 },
+  { id: 'klassisk-1kg', name: 'Stockfleths Klassisk 1 kg', kr: 630, g: 1000 }
+];
+const FILTER_KR = 149 / 100;          // ett filter per brygging
+const DEFAULT = { mode: 'antall', unit: 'g', preset: 'termos', n: 1, total: 500, ratio: 17, bean: 'halo-beriti', showPrice: false };
 const $ = id => document.getElementById(id);
 
 const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
@@ -344,6 +379,30 @@ function syncUrl() {
   } catch (e) {}
 }
 
+function fmtKr(v) { return 'kr ' + v.toFixed(2).replace('.', ','); }
+function renderPrice(c) {
+  $('price').hidden = !state.showPrice;
+  $('priceBtn').setAttribute('aria-expanded', state.showPrice);
+  $('priceBtn').textContent = state.showPrice ? 'Skjul pris' : 'Se pris';
+  if (!state.showPrice) return;
+  const bean = BEANS.find(b => b.id === state.bean) || BEANS[0];
+  $('bean').value = bean.id;
+  const coffeeKr = c.coffee * bean.kr / bean.g, total = coffeeKr + FILTER_KR;
+  $('priceTotal').textContent = fmtKr(total);
+  if (state.mode === 'antall' && state.n > 1) {
+    const p = all().find(x => x.id === state.preset) || BUILTIN[0];
+    $('priceEach').textContent = fmtKr(total / state.n) + ' per ' + (p.id === 'termos' ? 'termos' : p.name.toLowerCase());
+  } else {
+    $('priceEach').textContent = 'for denne bryggingen';
+  }
+  $('priceCoffeeLabel').textContent = 'Kaffe, ' + fmtC(c.coffee) + ' g à ' + bean.kr + ' kr per ' + bean.g + ' g';
+  $('priceCoffee').textContent = fmtKr(coffeeKr);
+  $('priceFilter').textContent = fmtKr(FILTER_KR);
+}
+BEANS.forEach(b => { const o = document.createElement('option'); o.value = b.id; o.textContent = (b.fav ? '★ ' : '') + b.name + ', ' + b.kr + ' kr'; $('bean').appendChild(o); });
+$('bean').onchange = () => { state.bean = $('bean').value; update(); };
+$('priceBtn').onclick = () => { state.showPrice = !state.showPrice; update(); };
+
 function update() {
   state.n = clamp(parseInt(state.n) || 1, 1, 20);
   state.total = clamp(+state.total || 50, 50, 5000);
@@ -361,6 +420,7 @@ function update() {
   $('outWater').innerHTML = Math.round(c.water) + '<small>' + state.unit + '</small>';
   $('outCup').textContent = fmtL(c.out);
   $('outAbs').textContent = fmtL(c.absorbed);
+  renderPrice(c);
   $('barOut').style.width = (c.out / c.water * 100) + '%';
   $('barAbs').style.width = (c.absorbed / c.water * 100) + '%';
   plan = buildPlan(c); renderPlan();

@@ -15,6 +15,7 @@ Kalkulator for pourover: velg hvor mye ferdig kaffe du vil ha, så får du gram 
 - **Antall:** velg en beholder (Camelbak termos 275 g, kopp 250 g eller dine egne) og hvor mange.
 - **Totalt:** skriv inn hvor mye ferdig kaffe du vil ha, for eksempel 500 g.
 - **Styrke:** forholdet mellom kaffe og vann du heller, fra 1:14 til 1:19. Standard er 1:17.
+- **Se pris:** velg kaffe fra Stockfleths, så regner siden ut hva bryggingen koster, med ett filter (149 kr for 100) per gang. Halo Beriti er valgt som standard.
 - **g eller ml:** 1 ml kaffe veier omtrent 1 g, så tallene er de samme.
 
 Egne beholdere og siste innstillinger lagres lokalt i nettleseren.
