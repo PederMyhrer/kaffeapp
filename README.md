@@ -12,7 +12,7 @@ Kalkulator for pourover: velg hvor mye ferdig kaffe du vil ha, så får du gram 
 
 ## Bruk
 
-- **Antall:** velg en beholder (Camelbak termos 275 g, kopp 200 g eller dine egne) og hvor mange.
+- **Antall:** velg en beholder (Camelbak termos 275 g, kopp 250 g eller dine egne) og hvor mange.
 - **Totalt:** skriv inn hvor mye ferdig kaffe du vil ha, for eksempel 500 g.
 - **Styrke:** forholdet mellom kaffe og vann du heller, fra 1:14 til 1:19. Standard er 1:17.
 - **g eller ml:** 1 ml kaffe veier omtrent 1 g, så tallene er de samme.
