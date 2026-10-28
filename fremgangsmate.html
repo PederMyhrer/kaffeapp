@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fremgangsmåte · Kaffeapp</title>
+<meta name="description" content="Slik brygger du pourover med ferdigmalt filterkaffe, steg for steg.">
+<meta name="theme-color" content="#6b3f22">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 3.5c-1.4 1.8 1.4 2.8 0 4.6M15 2.5c-1.4 1.8 1.4 2.8 0 4.6M20 3.5c-1.4 1.8 1.4 2.8 0 4.6' stroke='%23c0803f' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Cpath d='M24 14h1.8a3.6 3.6 0 0 1 0 7.2H23' stroke='%237a4626' stroke-width='2.4' fill='none'/%3E%3Cpath d='M4 11.5h21v6.5a9 9 0 0 1-9 9h-3a9 9 0 0 1-9-9z' fill='%237a4626'/%3E%3Cellipse cx='14.5' cy='11.8' rx='10.5' ry='1.7' fill='%23c0803f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<style>
+.gear { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.gear li { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 4px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 36px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+ol.steps li:last-child { border-bottom: 0; }
+ol.steps li::before { content: counter(s); font: 500 15px var(--mono); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--roast-soft); color: var(--roast); }
+ol.steps h3 { margin: 2px 0 2px; font-size: 17px; font-weight: 600; }
+ol.steps p { margin: 0; max-width: 64ch; }
+.card.brew { border-top: 3px solid var(--roast); }
+.card.tune { border-top: 3px solid var(--crema); }
+.tune-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.tune-grid h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+.tune-grid p { margin: 0; color: var(--muted); }
+.crosslink { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.crosslink p { margin: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="site-nav" aria-label="Hovedmeny"><a class="brand" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 3.5c-1.4 1.8 1.4 2.8 0 4.6M15 2.5c-1.4 1.8 1.4 2.8 0 4.6M20 3.5c-1.4 1.8 1.4 2.8 0 4.6" stroke="#c0803f" stroke-width="1.7" fill="none" stroke-linecap="round"/><path d="M24 14h1.8a3.6 3.6 0 0 1 0 7.2H23" stroke="#7a4626" stroke-width="2.4" fill="none"/><path d="M4 11.5h21v6.5a9 9 0 0 1-9 9h-3a9 9 0 0 1-9-9z" fill="#7a4626"/><ellipse cx="14.5" cy="11.8" rx="10.5" ry="1.7" fill="#c0803f"/></svg>Kaffeapp</a><ul><li><a href="index.html">Kalkulator</a></li><li><a href="fremgangsmate.html" aria-current="page">Fremgangsmåte</a></li></ul></nav>
+
+  <header>
+    <h1>Fremgangsmåte</h1>
+    <p class="lede">Pourover med ferdigmalt filterkaffe som Stockfleths. Mengdene henter du fra kalkulatoren, her er hvordan.</p>
+  </header>
+
+  <section class="card">
+    <h2>Du trenger</h2>
+    <p class="sub">Vekta er det viktigste, resten kan byttes ut</p>
+    <ul class="gear">
+      <li>Pourover-holder og filter</li>
+      <li>Kjøkkenvekt</li>
+      <li>Vannkoker, gjerne med svanehals</li>
+      <li>Kopp, kanne eller termos</li>
+      <li>Filterkaffe</li>
+    </ul>
+  </section>
+
+  <section class="card brew">
+    <h2>Bryggingen</h2>
+    <p class="sub">Rundt tre minutter fra første helling for én termos</p>
+    <ol class="steps">
+      <li><div><h3>Varm vannet</h3><p>Kok opp litt mer vann enn kalkulatoren sier, så du har nok til å skylle filteret. La det stå et halvt minutt etter at det har kokt, da ligger det rundt 93 til 96 grader.</p></div></li>
+      <li><div><h3>Skyll filteret</h3><p>Sett filteret i holderen og hell varmt vann gjennom. Det fjerner papirsmak og varmer opp koppen eller termosen. Hell ut skyllevannet.</p></div></li>
+      <li><div><h3>Vei opp kaffen</h3><p>Hell kaffen i filteret, rist det forsiktig så overflaten blir flat, og sett alt på vekta. Nullstill vekta.</p></div></li>
+      <li><div><h3>Bloom</h3><p>Hell omtrent dobbelt så mye vann som kaffe, nok til at alt blir vått. Vent 30 til 45 sekunder mens kaffen bobler og slipper ut gass. Da trekker resten jevnere.</p></div></li>
+      <li><div><h3>Hell i runder</h3><p>Hell rolig i små sirkler fra midten og ut, og unngå å treffe papiret direkte. Følg tallene i helleplanen og stopp når vekta viser totalen.</p></div></li>
+      <li><div><h3>La det renne gjennom</h3><p>Gi holderen en liten virvel så sengen legger seg flatt. Når det slutter å dryppe jevnt er kaffen ferdig. Det som blir igjen i gruten er regnet med.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="card tune">
+    <h2>Juster etter smak</h2>
+    <p class="sub">Endre én ting om gangen</p>
+    <div class="tune-grid">
+      <div><h3>Bitter eller tørr</h3><p>Velg et mildere forhold, eller hell litt raskere. Ferdigmalt kaffe er ofte finmalt for pourover, og da trekker den fort.</p></div>
+      <div><h3>Tynn eller syrlig</h3><p>Velg et sterkere forhold, bruk varmere vann, eller ta deg bedre tid på hellingene.</p></div>
+      <div><h3>Renner veldig tregt</h3><p>Hell i færre og større runder og ikke rør i sengen. Går det over fem minutter, prøv litt mindre kaffe.</p></div>
+    </div>
+  </section>
+
+  <div class="crosslink">
+    <p>Klar for en kopp? <a href="index.html">Gå til kalkulatoren</a></p>
+  </div>
+
+  <footer class="about">
+    <div>
+      <h2>Personvern</h2>
+      <p>Siden bruker ingen informasjonskapsler (cookies), ingen sporing og ingen analyseverktøy, og den henter ingenting fra tredjeparter.</p>
+      <p>Siden ligger på GitHub Pages, som registrerer IP-adressen til besøkende i serverlogger, se <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHubs personvernerklæring</a>.</p>
+    </div>
+    <div>
+      <h2>Ansvar og lisens</h2>
+      <p>Laget for privat bruk og delt slik den er. Tallene er veiledende, og du bruker siden på eget ansvar.</p>
+      <p>Koden er åpen under <a href="https://github.com/PederMyhrer/kaffeapp/blob/main/LICENSE" rel="noopener">MIT-lisensen</a>. Skriftene Young Serif, Figtree og JetBrains Mono er lisensiert under SIL Open Font License 1.1 og ligger med lisenstekst i <a href="https://github.com/PederMyhrer/kaffeapp/tree/main/fonts" rel="noopener">fonts-mappen</a>.</p>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaffeapp</title>
+<meta name="description" content="Regn ut hvor mye kaffe og vann du trenger til pourover, med helleplan og tidtaker.">
+<meta name="theme-color" content="#6b3f22">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 3.5c-1.4 1.8 1.4 2.8 0 4.6M15 2.5c-1.4 1.8 1.4 2.8 0 4.6M20 3.5c-1.4 1.8 1.4 2.8 0 4.6' stroke='%23c0803f' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Cpath d='M24 14h1.8a3.6 3.6 0 0 1 0 7.2H23' stroke='%237a4626' stroke-width='2.4' fill='none'/%3E%3Cpath d='M4 11.5h21v6.5a9 9 0 0 1-9 9h-3a9 9 0 0 1-9-9z' fill='%237a4626'/%3E%3Cellipse cx='14.5' cy='11.8' rx='10.5' ry='1.7' fill='%23c0803f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<style>
+.controls { display: grid; gap: 20px; }
+.ctl-label { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
+
+.seg { display: inline-flex; padding: 3px; gap: 3px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
+.seg button { border: 0; background: none; color: var(--muted); font: 600 14px var(--body); padding: 7px 16px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--roast); color: var(--surface); }
+.seg-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; flex-direction: column; align-items: flex-start; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 8px 14px; font: 500 15px var(--body); cursor: pointer; text-align: left; }
+.chip small { font: 500 12px var(--mono); color: var(--muted); }
+.chip:hover { border-color: var(--crema); }
+.chip[aria-pressed="true"] { border-color: var(--roast); background: var(--roast-soft); color: var(--roast); }
+.chip[aria-pressed="true"] small { color: var(--roast); }
+.chip.small { flex-direction: row; padding: 5px 12px; font: 500 14px var(--mono); border-radius: 999px; }
+
+.stepper { display: flex; align-items: center; gap: 8px; max-width: 220px; }
+.stepper button { width: 44px; height: 44px; flex: none; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 22px; cursor: pointer; }
+.stepper button:hover { border-color: var(--crema); }
+.stepper input, .field input { width: 100%; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: 500 19px var(--mono); text-align: center; }
+.field { display: flex; align-items: center; gap: 8px; max-width: 220px; }
+.field span { color: var(--muted); font-weight: 500; }
+
+.ratio-row { display: flex; justify-content: space-between; align-items: baseline; }
+.ratio-val { font: 500 22px var(--mono); color: var(--roast); }
+input[type=range] { width: 100%; accent-color: var(--roast); margin: 4px 0 10px; }
+
+.result { display: grid; gap: 16px; border-top: 4px solid var(--roast); }
+.big { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.big div { border-radius: 12px; padding: 14px 16px; }
+.big .c { background: var(--roast-soft); }
+.big .w { background: var(--water-soft); }
+.big span { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.big b { display: block; font: 500 clamp(34px, 9vw, 46px) var(--mono); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.big .c b { color: var(--roast); }
+.big .w b { color: var(--water); }
+.big b small { font-size: .5em; margin-left: 4px; }
+.split { display: grid; gap: 6px; }
+.bar { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--line); }
+.bar i { display: block; }
+.bar .out { background: var(--crema); }
+.bar .abs { background: var(--roast); opacity: .55; }
+.legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font-size: 14px; color: var(--muted); }
+.legend em { font-style: normal; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: 0; }
+
+.plan-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.timer { display: flex; align-items: center; gap: 10px; }
+.clock { font: 500 26px var(--mono); font-variant-numeric: tabular-nums; min-width: 4.2ch; text-align: right; }
+.btn { border: 1px solid var(--roast); background: var(--roast); color: var(--surface); font: 600 14px var(--body); padding: 9px 16px; border-radius: 999px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--roast); }
+table { width: 100%; border-collapse: collapse; }
+td { padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.t { font: 500 14px var(--mono); color: var(--muted); width: 56px; white-space: nowrap; }
+td.s b { display: block; font-weight: 600; }
+td.s span { color: var(--muted); font-size: 14px; }
+td.g { text-align: right; font: 500 18px var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+tr.now td { background: var(--crema-soft); }
+tr.now td.t { color: var(--roast); }
+tr.done td { opacity: .5; }
+
+details.own summary { cursor: pointer; font-weight: 600; color: var(--roast); }
+.own-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.own-form input { height: 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); padding: 0 12px; font: 500 15px var(--body); min-width: 0; }
+.own-form input[type=number] { width: 110px; font-family: var(--mono); }
+.own-form input[type=text] { flex: 1 1 160px; }
+.own-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.own-list li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.own-list button { border: 0; background: none; color: var(--muted); font: 600 13px var(--body); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.own-list .empty { color: var(--muted); border: 0; }
+
+.note { background: var(--crema-soft); border-radius: 14px; padding: 16px 20px; }
+.note p { margin: 0; max-width: 70ch; }
+.note p + p { margin-top: 8px; }
+.crosslink { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.crosslink p { margin: 0; color: var(--muted); }
+.link-btn { border: 0; background: none; color: var(--roast); font: 600 14px var(--body); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="site-nav" aria-label="Hovedmeny"><a class="brand" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 3.5c-1.4 1.8 1.4 2.8 0 4.6M15 2.5c-1.4 1.8 1.4 2.8 0 4.6M20 3.5c-1.4 1.8 1.4 2.8 0 4.6" stroke="#c0803f" stroke-width="1.7" fill="none" stroke-linecap="round"/><path d="M24 14h1.8a3.6 3.6 0 0 1 0 7.2H23" stroke="#7a4626" stroke-width="2.4" fill="none"/><path d="M4 11.5h21v6.5a9 9 0 0 1-9 9h-3a9 9 0 0 1-9-9z" fill="#7a4626"/><ellipse cx="14.5" cy="11.8" rx="10.5" ry="1.7" fill="#c0803f"/></svg>Kaffeapp</a><ul><li><a href="index.html" aria-current="page">Kalkulator</a></li><li><a href="fremgangsmate.html">Fremgangsmåte</a></li></ul></nav>
+
+  <header>
+    <h1>Hvor mye kaffe?</h1>
+    <p class="lede">Velg hvor mye ferdig kaffe du vil ha, så får du gram kaffe, hvor mye vann du skal helle og en helleplan for pourover.</p>
+  </header>
+
+  <section class="card controls" aria-label="Innstillinger">
+    <div class="seg-row">
+      <div class="seg" role="group" aria-label="Hvordan vil du velge mengde">
+        <button type="button" data-mode="antall">Antall</button>
+        <button type="button" data-mode="totalt">Totalt</button>
+      </div>
+      <div class="seg" role="group" aria-label="Enhet">
+        <button type="button" data-unit="g">g</button>
+        <button type="button" data-unit="ml">ml</button>
+      </div>
+    </div>
+
+    <div id="modeAntall" class="row2">
+      <div>
+        <span class="ctl-label">Beholder</span>
+        <div class="chips" id="presetChips"></div>
+      </div>
+      <div>
+        <label class="ctl-label" for="n">Antall</label>
+        <div class="stepper">
+          <button type="button" id="minus" aria-label="Færre">−</button>
+          <input id="n" type="number" min="1" max="20" value="1" inputmode="numeric">
+          <button type="button" id="plus" aria-label="Flere">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modeTotalt" hidden>
+      <label class="ctl-label" for="total">Ferdig kaffe totalt</label>
+      <div class="field"><input id="total" type="number" min="50" max="5000" step="10" value="500" inputmode="numeric"><span class="unit">g</span></div>
+      <div class="chips" id="totalChips" style="margin-top:10px"></div>
+    </div>
+
+    <div>
+      <div class="ratio-row"><label class="ctl-label" for="ratio">Styrke (kaffe til vann)</label><span class="ratio-val" id="ratioVal">1:17</span></div>
+      <input id="ratio" type="range" min="14" max="19" step="0.5" value="17">
+      <div class="chips" id="ratioChips"></div>
+    </div>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-label="Resultat">
+    <div class="big">
+      <div class="c"><span>Kaffe</span><b id="outCoffee"></b></div>
+      <div class="w"><span>Vann å helle</span><b id="outWater"></b></div>
+    </div>
+    <div class="split">
+      <div class="bar" aria-hidden="true"><i class="out" id="barOut"></i><i class="abs" id="barAbs"></i></div>
+      <div class="legend">
+        <span><em style="background:var(--crema)"></em>I koppen <b class="num" id="outCup"></b></span>
+        <span><em style="background:var(--roast);opacity:.55"></em>Blir igjen i gruten <b class="num" id="outAbs"></b></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Helleplan">
+    <div class="plan-head">
+      <div><h2 style="font-family:var(--display);font-weight:400;font-size:22px;margin:0">Helleplan</h2><p class="sub" style="margin:2px 0 0">Tall på vekta, med kanne og filter tarert</p></div>
+      <div class="timer">
+        <span class="clock" id="clock">0:00</span>
+        <button type="button" class="btn" id="startBtn">Start</button>
+        <button type="button" class="btn ghost" id="resetBtn">Nullstill</button>
+      </div>
+    </div>
+    <table id="plan"></table>
+  </section>
+
+  <section class="card">
+    <details class="own">
+      <summary>Egne beholdere</summary>
+      <form class="own-form" id="ownForm">
+        <input type="text" id="ownName" placeholder="Navn, f.eks. Stort krus" maxlength="30" required aria-label="Navn">
+        <input type="number" id="ownAmount" placeholder="Mengde" min="30" max="3000" required inputmode="numeric" aria-label="Mengde">
+        <button type="submit" class="btn">Legg til</button>
+      </form>
+      <ul class="own-list" id="ownList"></ul>
+    </details>
+  </section>
+
+  <section class="note">
+    <p><strong>Slik regnes det.</strong> Du velger hvor mye ferdig kaffe du vil ende opp med. Kaffegruten holder igjen omtrent dobbelt så mye vann som den veier, så siden legger det på vannet du heller. Forholdet er gram kaffe mot gram vann du heller, og 1:17 er det som ga deg 18 g kaffe til 275 g i termosen.</p>
+    <p>1 ml kaffe veier omtrent 1 g, så gram og milliliter kan brukes om hverandre. Bryggevekta er fortsatt det sikreste.</p>
+  </section>
+
+  <div class="crosslink">
+    <button type="button" class="link-btn" id="resetAll">Tilbake til standard</button>
+    <p>Første gang? <a href="fremgangsmate.html">Se fremgangsmåten</a></p>
+  </div>
+
+  <footer class="about">
+    <div>
+      <h2>Personvern</h2>
+      <p>Siden bruker ingen informasjonskapsler (cookies), ingen sporing og ingen analyseverktøy, og den henter ingenting fra tredjeparter. Alt regnes ut i nettleseren din.</p>
+      <p>Egne beholdere og siste innstillinger lagres bare lokalt i nettleseren din, så de er der neste gang. Ingenting sendes noe sted, og du fjerner det ved å slette nettstedsdata. Siden ligger på GitHub Pages, som registrerer IP-adressen til besøkende i serverlogger, se <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHubs personvernerklæring</a>.</p>
+    </div>
+    <div>
+      <h2>Ansvar og lisens</h2>
+      <p>Laget for privat bruk og delt slik den er. Tallene er veiledende, og du bruker siden på eget ansvar.</p>
+      <p>Koden er åpen under <a href="https://github.com/PederMyhrer/kaffeapp/blob/main/LICENSE" rel="noopener">MIT-lisensen</a>. Skriftene Young Serif, Figtree og JetBrains Mono er lisensiert under SIL Open Font License 1.1 og ligger med lisenstekst i <a href="https://github.com/PederMyhrer/kaffeapp/tree/main/fonts" rel="noopener">fonts-mappen</a>.</p>
+    </div>
+  </footer>
+</div>
+<script>
+const ABSORB = 2;                     // gram vann gruten holder igjen per gram kaffe
+const BUILTIN = [
+  { id: 'termos', name: 'Camelbak termos', amount: 275 },
+  { id: 'kopp', name: 'Kopp', amount: 200 }
+];
+const RATIOS = [[15, 'Sterk'], [16, 'Normal'], [17, 'Din'], [18, 'Mild']];
+const TOTALS = [250, 500, 750, 1000];
+const DEFAULT = { mode: 'antall', unit: 'g', preset: 'termos', n: 1, total: 500, ratio: 17 };
+const $ = id => document.getElementById(id);
+
+const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+let custom = load('kaffeapp.custom', []);
+if (!Array.isArray(custom)) custom = [];
+let state = Object.assign({}, DEFAULT, load('kaffeapp.state', {}));
+
+// Lenker kan overstyre: ?m=t&t=500&r=16  eller  ?p=kopp&n=2
+try {
+  const q = new URLSearchParams(location.search);
+  if (q.get('m')) state.mode = q.get('m') === 't' ? 'totalt' : 'antall';
+  if (q.get('p')) state.preset = q.get('p');
+  if (+q.get('n') > 0) state.n = Math.round(+q.get('n'));
+  if (+q.get('t') > 0) { state.total = +q.get('t'); if (!q.get('m')) state.mode = 'totalt'; }
+  if (+q.get('r') > 0) state.ratio = +q.get('r');
+  if (q.get('u') === 'ml') state.unit = 'ml';
+} catch (e) {}
+
+const all = () => BUILTIN.concat(custom);
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const dec = v => String(v).replace('.', ',');
+const fmtC = g => (g < 20 ? (Math.round(g * 10) / 10).toFixed(1) : String(Math.round(g))).replace('.', ',');
+const fmtL = v => Math.round(v) + ' ' + state.unit;
+const r5 = v => Math.round(v / 5) * 5;
+const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+
+function chip(label, sub, pressed, onclick, small) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip' + (small ? ' small' : '');
+  b.setAttribute('aria-pressed', pressed);
+  b.textContent = label;
+  if (sub) { const s = document.createElement('small'); s.textContent = sub; b.appendChild(s); }
+  b.onclick = onclick;
+  return b;
+}
+
+function renderChips() {
+  if (!all().some(p => p.id === state.preset)) state.preset = 'termos';
+  const pc = $('presetChips'); pc.replaceChildren();
+  all().forEach(p => pc.appendChild(chip(p.name, p.amount + ' ' + state.unit, p.id === state.preset, () => { state.preset = p.id; update(); })));
+  const tc = $('totalChips'); tc.replaceChildren();
+  TOTALS.forEach(t => tc.appendChild(chip(t + ' ' + state.unit, null, +state.total === t, () => { state.total = t; $('total').value = t; update(); }, true)));
+  const rc = $('ratioChips'); rc.replaceChildren();
+  RATIOS.forEach(([r, l]) => rc.appendChild(chip(l + ' 1:' + r, null, +state.ratio === r, () => { state.ratio = r; $('ratio').value = r; update(); }, true)));
+  const ol = $('ownList'); ol.replaceChildren();
+  if (!custom.length) { const li = document.createElement('li'); li.className = 'empty'; li.textContent = 'Ingen egne ennå. Legg til en over, så dukker den opp som et valg.'; ol.appendChild(li); }
+  custom.forEach(p => {
+    const li = document.createElement('li');
+    const t = document.createElement('span'); t.innerHTML = '<b></b> <span class="num"></span>';
+    t.querySelector('b').textContent = p.name; t.querySelector('.num').textContent = p.amount + ' ' + state.unit;
+    const del = document.createElement('button'); del.type = 'button'; del.textContent = 'Fjern';
+    del.onclick = () => { custom = custom.filter(c => c.id !== p.id); save('kaffeapp.custom', custom); update(); };
+    li.append(t, del); ol.appendChild(li);
+  });
+}
+
+function compute() {
+  const p = all().find(x => x.id === state.preset) || BUILTIN[0];
+  const out = state.mode === 'antall' ? p.amount * state.n : state.total;
+  const coffee = out / (state.ratio - ABSORB);
+  const water = coffee * state.ratio;
+  return { out, coffee, water, absorbed: water - out };
+}
+
+function buildPlan(c) {
+  const W = Math.round(c.water);
+  const bloom = Math.max(r5(c.coffee * 2), 10);
+  const pours = W <= 450 ? 2 : W <= 800 ? 3 : 4;
+  const steps = [{ t: 0, title: 'Bloom', text: 'Hell rolig over all kaffen og vent til den slutter å boble.', to: bloom }];
+  for (let i = 1; i <= pours; i++) {
+    const to = i === pours ? W : r5(bloom + (W - bloom) * i / pours);
+    steps.push({ t: 45 * i, title: i === pours ? 'Siste helling' : 'Helling ' + i, text: i === pours ? 'Fyll opp til totalen og gi filteret en liten virvel.' : 'Hell i små sirkler fra midten og ut.', to });
+  }
+  const end = 45 * pours + 90 + Math.max(0, W - 300) / 10;
+  steps.push({ t: Math.round(end / 15) * 15, title: 'Ferdig', text: 'Alt vannet har rent gjennom. Ta av filteret.', to: null });
+  return steps;
+}
+
+let finished = false, plan = [], running = false, startedAt = 0, elapsed = 0, timerId = null, lastIdx = -1, wakeLock = null;
+
+function renderPlan() {
+  const tb = $('plan'); tb.replaceChildren();
+  plan.forEach((s, i) => {
+    const tr = document.createElement('tr'); tr.dataset.i = i;
+    tr.innerHTML = '<td class="t"></td><td class="s"><b></b><span></span></td><td class="g"></td>';
+    tr.children[0].textContent = mmss(s.t);
+    tr.querySelector('b').textContent = s.title;
+    tr.querySelector('span').textContent = s.text;
+    tr.children[2].textContent = s.to == null ? '' : fmtL(s.to);
+    tb.appendChild(tr);
+  });
+  highlight();
+}
+
+function currentTime() { return elapsed + (running ? (Date.now() - startedAt) / 1000 : 0); }
+function highlight() {
+  const t = currentTime();
+  $('clock').textContent = mmss(t);
+  let idx = -1;
+  if (running || t > 0) plan.forEach((s, i) => { if (t >= s.t) idx = i; });
+  document.querySelectorAll('#plan tr').forEach((tr, i) => {
+    tr.classList.toggle('now', i === idx);
+    tr.classList.toggle('done', idx >= 0 && i < idx);
+  });
+  if (running && idx !== lastIdx && idx > 0) { try { navigator.vibrate && navigator.vibrate(150); } catch (e) {} }
+  lastIdx = idx;
+  if (running && idx === plan.length - 1) { stopTimer(); finished = true; $('startBtn').textContent = 'Start på nytt'; }
+}
+async function stopTimer() {
+  elapsed = currentTime(); running = false; clearInterval(timerId);
+  $('startBtn').textContent = 'Fortsett';
+  try { wakeLock && await wakeLock.release(); } catch (e) {} wakeLock = null;
+}
+$('startBtn').onclick = async () => {
+  if (running) { stopTimer(); return; }
+  if (finished) { elapsed = 0; finished = false; }
+  running = true; startedAt = Date.now(); lastIdx = -2;
+  $('startBtn').textContent = 'Pause';
+  timerId = setInterval(highlight, 250); highlight();
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+};
+$('resetBtn').onclick = () => { stopTimer(); finished = false; elapsed = 0; lastIdx = -1; $('startBtn').textContent = 'Start'; highlight(); };
+
+function syncUrl() {
+  try {
+    const q = new URLSearchParams();
+    if (state.mode === 'totalt') { q.set('t', state.total); } else { q.set('p', state.preset); if (state.n !== 1) q.set('n', state.n); }
+    if (+state.ratio !== 17) q.set('r', state.ratio);
+    if (state.unit === 'ml') q.set('u', 'ml');
+    history.replaceState(null, '', location.pathname + '?' + q.toString());
+  } catch (e) {}
+}
+
+function update() {
+  state.n = clamp(parseInt(state.n) || 1, 1, 20);
+  state.total = clamp(+state.total || 50, 50, 5000);
+  state.ratio = clamp(+state.ratio || 17, 14, 19);
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === state.mode));
+  document.querySelectorAll('[data-unit]').forEach(b => b.setAttribute('aria-pressed', b.dataset.unit === state.unit));
+  $('modeAntall').hidden = state.mode !== 'antall';
+  $('modeTotalt').hidden = state.mode !== 'totalt';
+  document.querySelectorAll('.unit').forEach(e => e.textContent = state.unit);
+  $('ratioVal').textContent = '1:' + dec(state.ratio);
+  renderChips();
+
+  const c = compute();
+  $('outCoffee').innerHTML = fmtC(c.coffee) + '<small>g</small>';
+  $('outWater').innerHTML = Math.round(c.water) + '<small>' + state.unit + '</small>';
+  $('outCup').textContent = fmtL(c.out);
+  $('outAbs').textContent = fmtL(c.absorbed);
+  $('barOut').style.width = (c.out / c.water * 100) + '%';
+  $('barAbs').style.width = (c.absorbed / c.water * 100) + '%';
+  plan = buildPlan(c); renderPlan();
+  save('kaffeapp.state', state); syncUrl();
+}
+
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { state.mode = b.dataset.mode; update(); });
+document.querySelectorAll('[data-unit]').forEach(b => b.onclick = () => { state.unit = b.dataset.unit; update(); });
+$('minus').onclick = () => { state.n = Math.max(1, state.n - 1); $('n').value = state.n; update(); };
+$('plus').onclick = () => { state.n = Math.min(20, state.n + 1); $('n').value = state.n; update(); };
+$('n').oninput = () => { if (+$('n').value > 0) { state.n = $('n').value; update(); } };
+$('total').oninput = () => { if (+$('total').value >= 50) { state.total = +$('total').value; update(); } };
+$('ratio').oninput = () => { state.ratio = +$('ratio').value; update(); };
+$('ownForm').onsubmit = e => {
+  e.preventDefault();
+  const name = $('ownName').value.trim(), amount = Math.round(+$('ownAmount').value);
+  if (!name || !(amount >= 30)) return;
+  const p = { id: 'c' + Date.now().toString(36), name, amount: Math.min(3000, amount) };
+  custom.push(p); save('kaffeapp.custom', custom);
+  state.preset = p.id; state.mode = 'antall';
+  $('ownName').value = ''; $('ownAmount').value = '';
+  update();
+};
+$('resetAll').onclick = () => { state = Object.assign({}, DEFAULT); $('n').value = 1; $('total').value = 500; $('ratio').value = 17; update(); };
+
+$('n').value = state.n; $('total').value = state.total; $('ratio').value = state.ratio;
+update();
+</script>
+</body>
+</html>
